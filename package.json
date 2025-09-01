@@ -1,0 +1,19 @@
+{
+  "name": "recycle-quest",
+  "version": "1.0.0",
+  "description": "Gamified recycling app with React Native frontend and Python backend",
+  "private": true,
+  "workspaces": [
+    "mobile",
+    "backend"
+  ],
+  "scripts": {
+    "mobile": "cd mobile && npm start",
+    "backend": "cd backend && python -m uvicorn app.main:app --reload",
+    "dev": "concurrently \"npm run backend\" \"npm run mobile\"",
+    "setup": "npm install && cd mobile && npm install && cd ../backend && pip install -r requirements.txt"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

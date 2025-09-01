@@ -1,0 +1,75 @@
+version: '3.8'
+
+# Optional local development setup
+# For production, use Supabase + Upstash + Railway/Render
+
+services:
+  # Local PostgreSQL (optional - use Supabase for production)
+  postgres:
+    image: postgres:15-alpine
+    container_name: recyclequest-postgres
+    environment:
+      POSTGRES_DB: recyclequest
+      POSTGRES_USER: recyclequest
+      POSTGRES_PASSWORD: recyclequest123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recyclequest"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: ["local-db"]
+
+  # Local Redis (optional - use Upstash for production)
+  redis:
+    image: redis:7-alpine
+    container_name: recyclequest-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles: ["local-db"]
+
+  # FastAPI Backend (for local development)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: recyclequest-backend
+    environment:
+      # Use local databases or override with Supabase/Upstash URLs
+      - DATABASE_URL=${DATABASE_URL:-postgresql://recyclequest:recyclequest123@postgres:5432/recyclequest}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - ENVIRONMENT=development
+      - DEBUG=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+      redis:
+        condition: service_healthy
+        required: false
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    profiles: ["backend"]
+
+volumes:
+  postgres_data:
+  redis_data:
+
+# Usage:
+# Local development with cloud services: docker-compose up backend
+# Local development with local databases: docker-compose --profile local-db --profile backend up

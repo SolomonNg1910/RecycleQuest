@@ -1,0 +1,54 @@
+{
+  "name": "RecycleQuestMobile",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "lint": "eslint .",
+    "start": "react-native start",
+    "test": "jest",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "*",
+    "@react-native-camera-roll/camera-roll": "*",
+    "@react-navigation/bottom-tabs": "*",
+    "@react-navigation/native": "*",
+    "@react-navigation/stack": "*",
+    "@reduxjs/toolkit": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-camera": "*",
+    "react-native-chart-kit": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-push-notification": "*",
+    "react-native-qrcode-scanner": "*",
+    "react-native-reanimated": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-screens": "*",
+    "react-native-svg": "*",
+    "react-native-vector-icons": "*",
+    "react-redux": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "*",
+    "@babel/preset-env": "*",
+    "@babel/runtime": "*",
+    "@react-native/eslint-config": "*",
+    "@react-native/metro-config": "*",
+    "@tsconfig/react-native": "*",
+    "@types/react": "*",
+    "@types/react-test-renderer": "*",
+    "babel-jest": "*",
+    "eslint": "*",
+    "jest": "*",
+    "metro-react-native-babel-preset": "*",
+    "prettier": "*",
+    "react-test-renderer": "*",
+    "typescript": "*"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

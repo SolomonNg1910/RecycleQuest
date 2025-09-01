@@ -1,0 +1,44 @@
+# FastAPI and ASGI server
+fastapi
+uvicorn[standard]
+
+# Database
+sqlalchemy
+alembic
+psycopg2-binary
+
+# Redis for caching and real-time features
+redis
+hiredis
+
+# Authentication and security
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Background tasks
+celery
+
+# Data validation and serialization
+pydantic[email]
+pydantic-settings
+
+# HTTP client for external APIs
+httpx
+
+# Image processing (for computer vision integration)
+pillow
+opencv-python
+
+# File storage (Supabase)
+supabase
+
+# Development and testing
+pytest
+pytest-asyncio
+black
+isort
+mypy
+
+# Environment management
+python-dotenv
