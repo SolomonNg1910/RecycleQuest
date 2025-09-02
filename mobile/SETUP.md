@@ -2,7 +2,8 @@
 
 ## Prerequisites
 - **Node.js** (v16 or newer)
-- **Android Studio** with Android SDK
+- **Android Studio** with Android SDK (for Android development)
+- **Xcode** (for iOS development - Mac only)
 - **Java Development Kit (JDK)** 11 or newer
 
 ## Android Setup
@@ -44,7 +45,41 @@
 2. **Port 8081 in use:** Kill Metro with `Ctrl+C` and restart
 3. **App not connecting:** Check emulator network settings or run `adb reverse tcp:8081 tcp:8081`
 
+## iOS Setup (Mac only)
+
+### Prerequisites
+1. **Install Xcode** from Mac App Store
+2. **Install CocoaPods:** `brew install cocoapods`
+
+### Setup Steps
+1. **Install iOS dependencies:**
+   ```bash
+   cd ios && pod install
+   ```
+
+2. **Configure for your device:**
+   - Open `mobile/ios/TempProject.xcworkspace` (not .xcodeproj!)
+   - Select "TempProject" in navigator (blue folder icon at top left)
+   - Go to "Signing & Capabilities" tab
+   - **In the "Bundle Identifier" field:** Change from `com.solomonng.recyclequest` to something unique like `com.yourname.recyclequest`
+   - **In the "Team" dropdown:** Select your team (sign in with Apple ID if needed - free account is fine)
+
+3. **Run on device:**
+   - Connect iPhone via USB
+   - Select your device in Xcode toolbar
+   - Click play button ▶️ or press `Cmd+R`
+
+### First Time Setup
+- On your iPhone: Settings → General → VPN & Device Management
+- Trust your developer certificate when prompted
+
+### Alternative - iOS Simulator
+```bash
+npx react-native run-ios
+```
+
 ## Build Info
 - React Native 0.81
-- Target SDK: 36
-- Min SDK: 24
+- Target SDK: 36 (Android)
+- Min SDK: 24 (Android)
+- iOS: 13.0+
