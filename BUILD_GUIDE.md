@@ -46,6 +46,8 @@ cd backend
 
 # Create Python virtual environment (recommended)
 python -m venv venv
+or
+python3 -m venv venv
 
 # Activate virtual environment
 # On Windows:

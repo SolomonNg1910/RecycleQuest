@@ -13,12 +13,13 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "*",
     "@react-native-camera-roll/camera-roll": "*",
+    "@react-native/gradle-plugin": "^0.81.1",
     "@react-navigation/bottom-tabs": "*",
     "@react-navigation/native": "*",
     "@react-navigation/stack": "*",
     "@reduxjs/toolkit": "*",
     "react": "*",
-    "react-native": "*",
+    "react-native": "^0.81.1",
     "react-native-camera": "*",
     "react-native-chart-kit": "*",
     "react-native-gesture-handler": "*",
@@ -29,16 +30,20 @@
     "react-native-screens": "*",
     "react-native-svg": "*",
     "react-native-vector-icons": "*",
+    "react-native-worklets": "^0.5.0",
     "react-redux": "*"
   },
   "devDependencies": {
     "@babel/core": "*",
     "@babel/preset-env": "*",
     "@babel/runtime": "*",
+    "@react-native-community/cli": "^20.0.1",
     "@react-native/eslint-config": "*",
     "@react-native/metro-config": "*",
-    "@tsconfig/react-native": "*",
-    "@types/react": "*",
+    "@react-native/typescript-config": "^0.81.1",
+    "@tsconfig/react-native": "^3.0.6",
+    "@types/react": "^19.1.12",
+    "@types/react-native": "^0.72.8",
     "@types/react-test-renderer": "*",
     "babel-jest": "*",
     "eslint": "*",
@@ -46,7 +51,7 @@
     "metro-react-native-babel-preset": "*",
     "prettier": "*",
     "react-test-renderer": "*",
-    "typescript": "*"
+    "typescript": "^5.9.2"
   },
   "engines": {
     "node": ">=16"

@@ -198,6 +198,33 @@ mobile/android/app/release/
 mobile/android/app/debug/
 mobile/metro.config.js.bak
 
+# Android specific - CRITICAL FOR OTHERS TO RUN
+mobile/android/local.properties
+mobile/android/**/.cxx/
+mobile/android/app/.cxx/
+**/android/**/.cxx/
+mobile/android/app/*.keystore
+!mobile/android/app/debug.keystore
+mobile/android/app/*.hprof
+mobile/android/app/*.iml
+mobile/android/*.iml
+
+# Metro bundler
+mobile/.metro-health-check*
+
+# React Native bundle artifacts
+mobile/*.jsbundle
+
+# Flipper
+mobile/ios/Flipper-Folly
+
+# Xcode (iOS)
+mobile/ios/.xcode.env.local
+mobile/ios/build/
+mobile/ios/DerivedData/
+mobile/ios/*.xcuserstate
+mobile/ios/*.xcworkspace/xcuserdata/
+
 # Additional sensitive files
 *.pem
 *.key
