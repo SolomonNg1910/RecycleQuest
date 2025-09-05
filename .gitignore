@@ -231,3 +231,6 @@ mobile/ios/*.xcworkspace/xcuserdata/
 *.crt
 *.p12
 *.mobileprovision
+
+# Kiro directory
+.kiro/
