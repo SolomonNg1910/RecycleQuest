@@ -1,117 +1,98 @@
-# RecycleQuest
+# Recycle Quest
 
 A gamified recycling application that transforms everyday recycling tasks into engaging game-like experiences.
 
-## Architecture
+## Prerequisites
 
-- **Frontend**: React Native with TypeScript
-- **Backend**: Python FastAPI with SQLAlchemy
-- **Database**: Supabase PostgreSQL with Upstash Redis for caching
-- **Storage**: Cloudflare R2 for images and media
-- **Hosting**: Railway/Render for backend, Cloudflare for CDN
-- **Real-time**: WebSocket connections for live updates
+- Node.js and npm installed
+- Android Studio
+- For macOS users: Terminal access
 
-## Project Structure
+## Build Instructions
 
-```
-recycle-quest/
-├── mobile/                 # React Native app
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── screens/        # App screens
-│   │   ├── store/          # Redux store and slices
-│   │   ├── services/       # API services
-│   │   ├── types/          # TypeScript type definitions
-│   │   └── utils/          # Utility functions
-│   └── package.json
-├── backend/                # FastAPI backend
-│   ├── app/
-│   │   ├── api/            # API routes
-│   │   ├── core/           # Core configuration
-│   │   ├── models/         # Database models
-│   │   ├── schemas/        # Pydantic schemas
-│   │   ├── services/       # Business logic
-│   │   └── main.py         # FastAPI app entry point
-│   └── requirements.txt
-├── docker-compose.yml      # Local development setup
-└── README.md
+### 1. Install Node Dependencies
+
+```bash
+npm install
 ```
 
-## Quick Start
+### 2. Download and Setup Android Studio
 
-### Option 1: Cloud Services (Recommended)
-1. **Set up cloud services**:
-   - Create [Supabase](https://supabase.com) project for PostgreSQL
-   - Create [Upstash](https://upstash.com) Redis database
-   - Create [Cloudflare R2](https://cloudflare.com/products/r2/) bucket
-   - Deploy backend to [Railway](https://railway.app) or [Render](https://render.com)
+1. Download and install [Android Studio](https://developer.android.com/studio)
+2. Open Android Studio and complete the initial setup
 
-2. **Configure environment**:
+### 3. Configure Android SDK
+
+1. In Android Studio, go to **Settings** (or **Preferences** on macOS)
+2. Search for "Android SDK" in the settings
+3. Under **SDK Platforms** tab:
+   - Select **Android 16.0 Baklava API Level 36.0**
+4. Under **SDK Tools** tab, select the following:
+   - Android SDK Build-Tools
+   - NDK (Side by side)
+   - Android SDK Command-line Tools (latest)
+   - CMake
+   - Android Emulator
+   - Android SDK Platform-Tools
+5. Click **Apply** and wait for the components to download
+6. **Important**: Note down the Android SDK location shown at the top of the Android SDK settings page
+
+### 4. Environment Setup (macOS)
+
+For macOS users, you need to configure environment variables:
+
+1. Open Terminal and edit your shell profile:
+
    ```bash
-   cp backend/.env.example backend/.env
-   # Edit backend/.env with your cloud service URLs
+   code ~/.zshrc
    ```
 
-3. **Install and start**:
+2. Add the following lines to the file (replace `YOUR_SDK_PATH` with the actual path from step 3.6):
+
    ```bash
-   npm run setup
-   npm run dev
+   export ANDROID_HOME=YOUR_SDK_PATH
+   export PATH=$PATH:$ANDROID_HOME/emulator
+   export PATH=$PATH:$ANDROID_HOME/platform-tools
+   export PATH=$PATH:$ANDROID_HOME/tools
+   export PATH=$PATH:$ANDROID_HOME/tools/bin
    ```
 
-### Option 2: Local Development
-1. **Start local databases**:
+3. Save the file (`Ctrl+S` or `Cmd+S`)
+
+4. Reload your shell configuration:
    ```bash
-   docker-compose --profile local-db --profile backend up
+   source ~/.zshrc
    ```
 
-2. **Install dependencies**:
+### 5. Build and Run the Application
+
+1. Navigate to the mobile directory:
+
    ```bash
-   npm run setup
+   cd mobile
    ```
 
-3. **Start mobile app**:
+2. Start the React Native Metro bundler:
+
    ```bash
-   npm run mobile
+   npx react-native start
    ```
 
-## Features
+3. In a new terminal window/tab, run the Android application:
 
-- 🎮 Gamification with points, levels, and achievements
-- 🏆 Daily and weekly quests
-- 👥 Social leaderboards and team battles
-- 🎁 Real-world rewards marketplace
-- 📱 Smart bin integration with computer vision
-- 📚 Educational content and recycling tips
-- ⚡ Real-time updates with WebSocket connections
+   ```bash
+   npx react-native run-android
+   ```
 
-## Development
+4. Wait for dependencies to download and the Android app should appear on your emulator or connected device.
 
-See individual README files in `mobile/` and `backend/` directories for detailed setup instructions.
-## 
-Cost-Effective Architecture
+## Troubleshooting
 
-### Free Tier (MVP Development)
-- **Supabase**: 500MB PostgreSQL database, 2GB bandwidth/month
-- **Upstash**: 10K Redis commands/day
-- **Cloudflare R2**: 10GB storage, 1M Class A operations/month
-- **Railway**: 500 hours/month backend hosting
-- **Cloudflare CDN**: Unlimited bandwidth on free plan
+- Make sure you have an Android emulator running or a physical device connected via USB with USB debugging enabled
+- If you encounter permission issues on macOS, you may need to restart your terminal after setting up environment variables
+- Ensure all Android SDK components are properly downloaded and installed
 
-**Total Monthly Cost: $0** (within free tier limits)
+## Additional Notes
 
-### Production Scale (When You Grow)
-- **Supabase Pro**: $25/month (8GB database, 250GB bandwidth)
-- **Upstash**: $0.20 per 100K requests (pay-as-you-go)
-- **Cloudflare R2**: $0.015/GB storage + $0.36/million requests
-- **Railway Pro**: $5-20/month (depending on usage)
-- **Cloudflare Workers**: $5/month for 10M requests
-
-**Estimated Monthly Cost: $35-50** (for moderate traffic)
-
-### Why This Stack?
-- ✅ **No AWS complexity or costs**
-- ✅ **Generous free tiers for MVP development**
-- ✅ **Pay-as-you-grow pricing**
-- ✅ **Global CDN and edge computing**
-- ✅ **Managed services (no DevOps overhead)**
-- ✅ **Built-in real-time features**
+- The first build may take longer as it downloads and caches dependencies
+- Make sure your Android emulator is running before executing the run-android command
