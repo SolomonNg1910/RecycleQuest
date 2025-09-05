@@ -106,3 +106,23 @@ For macOS users, you need to configure environment variables:
 
 - The first build may take longer as it downloads and caches dependencies
 - Make sure your Android emulator is running before executing the run-android command
+
+## Key Features 
+
+- Points & Levels: Users earn RecycleCoins and XP for each correctly sorted item, progressing from Recycler → EcoHero → GreenChampion with badges and recognition.
+
+- Daily & Weekly Quests: Missions like Bin Run and Community Drive keep recycling engaging, combining individual and team goals.
+
+- Smart Scan Assistant: When unsure, users can scan an item and the app instantly identifies if it’s recyclable, reducing contamination and building recycling knowledge.
+
+- Social Leaderboards & Team Battles: Friendly competition at the community level fosters accountability and motivation.
+
+- Real-World Rewards: Coins can be redeemed for vouchers, discounts, and surprise “Golden Bin” bonuses, making efforts tangibly rewarding.
+
+- Sustained Engagement: Rotating mini-quests, seasonal challenges, and inspiring daily content such as inspirational quotes to prevent novelty fade.
+
+- Social Relatedness: EcoTeams and group milestones reinforce a sense of belonging and collective impact.
+
+## Uniqueness of Our Solution 
+
+RecycleQuest combines gamification, AI-driven guidance, social connection, and real-world rewards to make recycling engaging and rewarding. By combining knowledge with fun, it transforms recycling into a meaningful and lasting habit for individuals and communities.
