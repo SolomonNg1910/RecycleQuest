@@ -1,455 +1,193 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
+  Pressable,
+  ImageBackground,
 } from 'react-native';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+
+type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard';
 
 interface LeaderboardScreenProps {
-  navigation: any;
+  userLevel: number;
+  userXP: number;
+  onNavigate: (screen: Screen) => void;
 }
 
-const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState<'global' | 'local'>('global');
-  const globalLeaderboard = useSelector((state: RootState) => state.leaderboard.globalLeaderboard);
-  const localLeaderboard = useSelector((state: RootState) => state.leaderboard.localLeaderboard);
-  const currentUser = useSelector((state: RootState) => state.user.currentUser);
+const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
+  userLevel,
+  userXP,
+  onNavigate,
+}) => {
+  // Define all players including the user
+  const allPlayers = [
+    { name: 'GreenHero', level: 15, xp: 3250, isUser: false },
+    { name: 'EcoChamp', level: 1, xp: 20, isUser: false },
+    { name: 'You', level: userLevel, xp: userXP, isUser: true },
+  ];
 
-  const currentLeaderboard = activeTab === 'global' ? globalLeaderboard : localLeaderboard;
+  // Sort players by level (descending), then by XP (descending)
+  const sortedPlayers = allPlayers.sort((a, b) => {
+    if (a.level !== b.level) {
+      return b.level - a.level; // Higher level first
+    }
+    return b.xp - a.xp; // Higher XP first if same level
+  });
 
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return `#${rank}`;
+  // Get rank emojis
+  const getRankEmoji = (index: number) => {
+    switch (index) {
+      case 0: return '🥇';
+      case 1: return '🥈';
+      case 2: return '🥉';
+      default: return `${index + 1}️⃣`;
     }
   };
 
-  const getLevelTitle = (level: number) => {
-    if (level < 3) return 'Recycler';
-    if (level < 6) return 'EcoHero';
-    return 'GreenChampion';
-  };
-
-  const getLevelColor = (level: number) => {
-    if (level < 3) return '#81C784';
-    if (level < 6) return '#4CAF50';
-    return '#2E7D32';
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Leaderboard</Text>
-      </View>
-
-      {/* Tab Selector */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'global' && styles.activeTab]}
-          onPress={() => setActiveTab('global')}
-        >
-          <Text style={[styles.tabText, activeTab === 'global' && styles.activeTabText]}>
-            🌍 Global
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'local' && styles.activeTab]}
-          onPress={() => setActiveTab('local')}
-        >
-          <Text style={[styles.tabText, activeTab === 'local' && styles.activeTabText]}>
-            🏘️ Local
-          </Text>
-        </TouchableOpacity>
-      </View>
-
+    <ImageBackground 
+      source={require('../images/background.png')} 
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
       <ScrollView style={styles.scrollView}>
-        {/* Current User Stats */}
-        <View style={styles.userStatsCard}>
-          <Text style={styles.userStatsTitle}>Your Ranking</Text>
-          <View style={styles.userStatsContent}>
-            <View style={styles.userRank}>
-              <Text style={styles.userRankNumber}>
-                #{currentLeaderboard.find(entry => entry.userId === currentUser?.id)?.rank || 'N/A'}
-              </Text>
-              <Text style={styles.userRankLabel}>Your Rank</Text>
+        <View style={styles.content}>
+        <Text style={styles.title}>🏆 Leaderboard</Text>
+        <Text style={styles.subtitle}>Top recyclers by level & XP</Text>
+
+        {sortedPlayers.map((player, index) => (
+          <View 
+            key={player.name}
+            style={[
+              styles.leaderItem, 
+              player.isUser && styles.currentUser
+            ]}
+          >
+            <Text style={styles.rank}>{getRankEmoji(index)}</Text>
+            <View style={styles.playerInfo}>
+              <Text style={styles.name}>{player.name}</Text>
+              <Text style={styles.levelText}>Level {player.level}</Text>
             </View>
-            <View style={styles.userStats}>
-              <Text style={styles.userCoins}>{currentUser?.recycleCoins} coins</Text>
-              <Text style={[styles.userLevel, { color: getLevelColor(currentUser?.level || 1) }]}>
-                {getLevelTitle(currentUser?.level || 1)}
-              </Text>
-            </View>
+            <Text style={styles.xpText}>{player.xp.toLocaleString()} XP</Text>
           </View>
-        </View>
+        ))}
 
-        {/* Leaderboard List */}
-        <View style={styles.leaderboardContainer}>
-          <Text style={styles.sectionTitle}>
-            {activeTab === 'global' ? 'Global Rankings' : 'Your Neighborhood'}
-          </Text>
-          
-          {currentLeaderboard.map((entry, index) => (
-            <View 
-              key={entry.userId} 
-              style={[
-                styles.leaderboardItem,
-                entry.userId === currentUser?.id && styles.currentUserItem
-              ]}
-            >
-              <View style={styles.rankContainer}>
-                <Text style={styles.rankText}>{getRankIcon(entry.rank)}</Text>
-              </View>
-              
-              <View style={styles.userInfo}>
-                <Text style={[
-                  styles.userName,
-                  entry.userId === currentUser?.id && styles.currentUserName
-                ]}>
-                  {entry.name}
-                  {entry.userId === currentUser?.id && ' (You)'}
-                </Text>
-                <Text style={[
-                  styles.userTitle,
-                  { color: getLevelColor(entry.level) }
-                ]}>
-                  {getLevelTitle(entry.level)} • Level {entry.level}
-                </Text>
-              </View>
-              
-              <View style={styles.scoreContainer}>
-                <Text style={styles.scoreText}>{entry.coins}</Text>
-                <Text style={styles.scoreLabel}>coins</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Team Battles Section */}
-        <View style={styles.teamBattlesContainer}>
-          <Text style={styles.sectionTitle}>Team Battles</Text>
-          
-          <View style={styles.teamBattleCard}>
-            <Text style={styles.teamBattleTitle}>🏆 Monthly Challenge</Text>
-            <Text style={styles.teamBattleDescription}>
-              Join a team and compete for the top spot this month!
-            </Text>
-            
-            <View style={styles.teamBattleStats}>
-              <View style={styles.teamStat}>
-                <Text style={styles.teamStatNumber}>12</Text>
-                <Text style={styles.teamStatLabel}>Teams</Text>
-              </View>
-              <View style={styles.teamStat}>
-                <Text style={styles.teamStatNumber}>156</Text>
-                <Text style={styles.teamStatLabel}>Players</Text>
-              </View>
-              <View style={styles.teamStat}>
-                <Text style={styles.teamStatNumber}>15d</Text>
-                <Text style={styles.teamStatLabel}>Remaining</Text>
-              </View>
-            </View>
-            
-            <TouchableOpacity style={styles.joinTeamButton}>
-              <Text style={styles.joinTeamButtonText}>Join Team Battle</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Friends Section */}
-        <View style={styles.friendsContainer}>
-          <Text style={styles.sectionTitle}>Friends & Social</Text>
-          
-          <TouchableOpacity style={styles.friendsAction}>
-            <Text style={styles.friendsActionIcon}>👥</Text>
-            <View style={styles.friendsActionContent}>
-              <Text style={styles.friendsActionTitle}>Invite Friends</Text>
-              <Text style={styles.friendsActionDescription}>
-                Earn bonus coins when friends join RecycleQuest
-              </Text>
-            </View>
-            <Text style={styles.friendsActionArrow}>→</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.friendsAction}>
-            <Text style={styles.friendsActionIcon}>📱</Text>
-            <View style={styles.friendsActionContent}>
-              <Text style={styles.friendsActionTitle}>Share Achievement</Text>
-              <Text style={styles.friendsActionDescription}>
-                Show off your recycling progress on social media
-              </Text>
-            </View>
-            <Text style={styles.friendsActionArrow}>→</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <Pressable
+          style={[styles.button, styles.backButton]}
+          onPress={() => onNavigate('home')}
+        >
+          <Text style={styles.buttonText}>← Back to Home</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#2E7D32',
-  },
-  backButton: {
-    color: 'white',
-    fontSize: 16,
-    marginRight: 20,
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    margin: 20,
-    borderRadius: 10,
-    padding: 5,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  tab: {
-    flex: 1,
-    padding: 12,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  activeTab: {
-    backgroundColor: '#2E7D32',
-  },
-  tabText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: 'bold',
-  },
-  activeTabText: {
-    color: 'white',
   },
   scrollView: {
     flex: 1,
   },
-  userStatsCard: {
-    margin: 20,
-    marginTop: 0,
+  content: {
     padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 15,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  userStatsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2E7D32',
-    marginBottom: 15,
-  },
-  userStatsContent: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
-  userRank: {
-    alignItems: 'center',
-    marginRight: 30,
-  },
-  userRankNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  userRankLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
-  },
-  userStats: {
-    flex: 1,
-  },
-  userCoins: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  userLevel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginTop: 5,
-  },
-  leaderboardContainer: {
-    paddingHorizontal: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  leaderboardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
+  title: {
+    fontSize: 36,
+    fontWeight: '800',
+    color: '#1B5E20',
     marginBottom: 10,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    textAlign: 'center',
+    textShadowColor: 'rgba(255, 255, 255, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
-  currentUserItem: {
-    borderWidth: 2,
+  subtitle: {
+    fontSize: 20,
+    color: '#2E7D32',
+    marginBottom: 30,
+    textAlign: 'center',
+    fontWeight: '600',
+    textShadowColor: 'rgba(255, 255, 255, 0.7)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
+  },
+  leaderItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: 20,
+    borderRadius: 18,
+    marginBottom: 15,
+    width: '100%',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+  },
+  currentUser: {
+    borderWidth: 3,
     borderColor: '#4CAF50',
-    backgroundColor: '#F1F8E9',
+    backgroundColor: 'rgba(232, 245, 233, 0.98)',
+    transform: [{ scale: 1.02 }],
   },
-  rankContainer: {
-    width: 50,
-    alignItems: 'center',
+  rank: {
+    fontSize: 32,
+    marginRight: 20,
   },
-  rankText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  userInfo: {
+  playerInfo: {
     flex: 1,
-    marginLeft: 15,
+    marginLeft: 5,
   },
-  userName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  currentUserName: {
-    color: '#2E7D32',
-  },
-  userTitle: {
-    fontSize: 12,
-    marginTop: 3,
-  },
-  scoreContainer: {
-    alignItems: 'center',
-  },
-  scoreText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-  },
-  scoreLabel: {
-    fontSize: 10,
-    color: '#666',
-  },
-  teamBattlesContainer: {
-    padding: 20,
-  },
-  teamBattleCard: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 20,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  teamBattleTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  teamBattleDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 20,
-  },
-  teamBattleStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  teamStat: {
-    alignItems: 'center',
-  },
-  teamStatNumber: {
+  name: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FF9800',
+    fontWeight: '700',
+    color: '#1B5E20',
+    marginBottom: 2,
   },
-  teamStatLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 5,
+  levelText: {
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '600',
   },
-  joinTeamButton: {
-    backgroundColor: '#FF9800',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  joinTeamButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  xpText: {
     fontSize: 16,
+    color: '#2E7D32',
+    fontWeight: '600',
+    backgroundColor: '#E8F5E8',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    textAlign: 'center',
+    minWidth: 80,
   },
-  friendsContainer: {
-    padding: 20,
-  },
-  friendsAction: {
-    flexDirection: 'row',
+  button: {
+    backgroundColor: '#4CAF50',
+    padding: 18,
+    borderRadius: 15,
+    marginBottom: 15,
+    width: 250,
     alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 1,
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
   },
-  friendsActionIcon: {
-    fontSize: 24,
-    marginRight: 15,
+  backButton: {
+    backgroundColor: '#757575',
+    marginTop: 20,
   },
-  friendsActionContent: {
-    flex: 1,
-  },
-  friendsActionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  friendsActionDescription: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 3,
-  },
-  friendsActionArrow: {
+  buttonText: {
+    color: 'white',
     fontSize: 18,
-    color: '#666',
+    fontWeight: '600',
   },
 });
 

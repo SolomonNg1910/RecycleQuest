@@ -1,3 +1,7 @@
+// BACKUP: ScannerScreen with Enhanced Camera Simulation
+// This version includes realistic camera-like interface with animations
+// Created as backup before implementing real camera feed
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -10,9 +14,8 @@ import {
   Animated,
   PermissionsAndroid,
   Platform,
-  ImageBackground,
 } from 'react-native';
-import { Camera, CameraType } from 'react-native-camera-kit';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard';
 
@@ -23,12 +26,11 @@ interface ScannerScreenProps {
 }
 
 interface RecycledItem {
-  type: 'paper' | 'plastic' | 'glass' | 'metal' | 'electronics' | 'food';
+  type: 'paper' | 'plastic' | 'glass' | 'metal' | 'electronics';
   name: string;
   weight: number;
   coins: number;
   xp: number;
-  accepted?: boolean;
 }
 
 type ScanMode = 'menu' | 'qr' | 'item';
@@ -43,7 +45,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
   const [scanResult, setScanResult] = useState<string>('');
   const [detectedItem, setDetectedItem] = useState<RecycledItem | null>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-
+  const [cameraReady, setCameraReady] = useState(false);
   
   // Animated values for scanning effects
   const scanLineAnim = useRef(new Animated.Value(0)).current;
@@ -73,7 +75,6 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
         setHasPermission(false);
       }
     } else {
-      // iOS will prompt automatically when WebView requests camera
       setHasPermission(true);
     }
   };
@@ -137,29 +138,24 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
     { type: 'plastic', name: 'Food Container', weight: 25, coins: 18, xp: 7 },
   ];
 
-  const simulateQRDetection = () => {
-    if (isScanning) return;
-    
+  const simulateQRScan = () => {
     setIsScanning(true);
     setScanResult('');
     
-    // Simulate realistic QR detection delay (2-4 seconds)
+    // Simulate 2-3 second scan delay
     setTimeout(() => {
-      const binIds = ['BIN-A001', 'BIN-B002', 'BIN-C003', 'RECYCLE-D004', 'ECO-BIN-005'];
+      const binIds = ['BIN-001', 'BIN-002', 'BIN-003', 'BIN-004'];
       const randomBin = binIds[Math.floor(Math.random() * binIds.length)];
-      setScanResult(`✅ ${randomBin} detected!`);
-      onBinScan(); // Track bin scan for quest
+      setScanResult(`✅ Bin ${randomBin} detected!`);
+      setIsScanning(false);
       
-      // Auto proceed to item scanning after showing result
+      // Auto proceed to item scanning after 1.5s
       setTimeout(() => {
         setScanMode('item');
         setScanResult('');
-        setIsScanning(false);
       }, 1500);
-    }, 2000 + Math.random() * 2000); // 2-4 second realistic detection time
+    }, 2500);
   };
-
-  const [scanCount, setScanCount] = useState(0);
 
   const simulateItemScan = () => {
     setIsScanning(true);
@@ -167,86 +163,46 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
     
     // Simulate AI processing delay (3 seconds)
     setTimeout(() => {
-      const isAccepted = scanCount % 2 === 0; // Alternate between accepted and rejected
-      
-      let finalItem;
-      if (isAccepted) {
-        // Accepted item - Metal Can
-        finalItem = {
-          type: 'metal' as const,
-          name: 'Aluminum Can',
-          weight: 15,
-          coins: 25,
-          xp: 10,
-          accepted: true
-        };
-      } else {
-        // Rejected item - Food
-        finalItem = {
-          type: 'food' as const,
-          name: 'Food Waste',
-          weight: 0,
-          coins: 0,
-          xp: 0,
-          accepted: false
-        };
-      }
+      const randomItem = recyclableItems[Math.floor(Math.random() * recyclableItems.length)];
+      // Add some weight variation (±20%)
+      const weightVariation = 0.8 + Math.random() * 0.4;
+      const finalItem = {
+        ...randomItem,
+        weight: Math.round(randomItem.weight * weightVariation),
+        coins: Math.round(randomItem.coins * weightVariation),
+        xp: Math.round(randomItem.xp * weightVariation),
+      };
       
       setDetectedItem(finalItem);
       setIsScanning(false);
-      setScanCount(prev => prev + 1);
       
-      // Show result
+      // Show success and update user stats
       setTimeout(() => {
-        if (finalItem.accepted) {
-          onItemScanned(finalItem);
-          Alert.alert(
-            '🎉 Item Accepted!',
-            `${finalItem.name} (${finalItem.weight}g)\n+${finalItem.coins} RecycleCoins\n+${finalItem.xp} XP`,
-            [
-              {
-                text: 'Scan Another',
-                onPress: () => {
-                  setScanMode('menu');
-                  setDetectedItem(null);
-                }
-              },
-              {
-                text: 'Done',
-                onPress: () => onNavigate('home')
+        onItemScanned(finalItem);
+        Alert.alert(
+          '🎉 Item Recycled!',
+          `${finalItem.name} (${finalItem.weight}g)\n+${finalItem.coins} RecycleCoins\n+${finalItem.xp} XP`,
+          [
+            {
+              text: 'Scan Another',
+              onPress: () => {
+                setScanMode('menu');
+                setDetectedItem(null);
               }
-            ]
-          );
-        } else {
-          Alert.alert(
-            '❌ Item Not Accepted',
-            `${finalItem.name} cannot be recycled here.\nPlease dispose of food waste in compost bins.`,
-            [
-              {
-                text: 'Try Again',
-                onPress: () => {
-                  setDetectedItem(null);
-                }
-              },
-              {
-                text: 'Back',
-                onPress: () => setScanMode('menu')
-              }
-            ]
-          );
-        }
+            },
+            {
+              text: 'Done',
+              onPress: () => onNavigate('home')
+            }
+          ]
+        );
       }, 2000);
     }, 3000);
   };
 
   const renderMenu = () => (
-    <ImageBackground 
-      source={require('../images/background.png')} 
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
-      <View style={[styles.container, styles.safeArea]}>
-        <View style={styles.content}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
         <Text style={styles.title}>📱 RecycleQuest Scanner</Text>
         <Text style={styles.subtitle}>Choose scanning mode</Text>
 
@@ -277,21 +233,11 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
           <Text style={styles.buttonText}>← Back to Home</Text>
         </Pressable>
       </View>
-    </View>
-    </ImageBackground>
+    </SafeAreaView>
   );
 
-  // REAL LIVE CAMERA using react-native-camera-kit (React 19 compatible!)
-  const LiveCameraView = ({ 
-    children, 
-    onRead, 
-    showMarker = true 
-  }: { 
-    children?: React.ReactNode;
-    onRead?: (e: any) => void;
-    showMarker?: boolean;
-  }) => {
-
+  // Enhanced camera component with better compatibility
+  const CameraView = ({ children, isQRMode = false }: { children: React.ReactNode; isQRMode?: boolean }) => {
     if (hasPermission === null) {
       return (
         <View style={styles.permissionContainer}>
@@ -304,7 +250,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
     if (hasPermission === false) {
       return (
         <View style={styles.permissionContainer}>
-          <Text style={styles.permissionText}>📷 Camera Access Required</Text>
+          <Text style={styles.permissionText}>📷 Camera access required</Text>
           <Text style={styles.permissionSubtext}>
             RecycleQuest needs camera access to scan QR codes and identify recyclable items
           </Text>
@@ -315,66 +261,58 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
       );
     }
 
-    // REAL LIVE CAMERA FEED! 🎉
+    // Create a realistic live camera experience
     return (
       <View style={styles.cameraView}>
-        <Camera
-          style={styles.liveCameraStyle}
-          cameraType={CameraType.Back}
-          onReadCode={onRead}
-          showFrame={false}
-          laserColor="transparent"
-          frameColor="transparent"
-        />
-        
-        {/* Live camera status overlay */}
-        <View style={styles.cameraStatusOverlay}>
-          <View style={styles.cameraIndicator}>
+        <View style={styles.liveCameraFeed}>
+          <View style={styles.cameraBackground}>
+            {/* Camera status indicator */}
+            <View style={styles.cameraStatus}>
+              <View style={styles.recordingDot} />
+              <Text style={styles.cameraStatusText}>LIVE</Text>
+            </View>
+            
+            {/* Simulated camera noise/grain for realism */}
+            <View style={styles.cameraGrain} />
+            
+            {/* Dynamic elements that simulate real camera feed */}
             <Animated.View 
               style={[
-                styles.recordingDot,
+                styles.dynamicElement1,
                 {
-                  opacity: pulseAnim.interpolate({
-                    inputRange: [1, 1.1],
-                    outputRange: [0.7, 1],
+                  opacity: scanLineAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.3, 0.7],
                   })
                 }
               ]} 
             />
-            <Text style={styles.cameraStatusText}>LIVE</Text>
+            <Animated.View 
+              style={[
+                styles.dynamicElement2,
+                {
+                  transform: [{
+                    translateX: scanLineAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [-20, 20],
+                    })
+                  }]
+                }
+              ]} 
+            />
           </View>
-          <Text style={styles.cameraHint}>Point camera at object</Text>
-          
-          <View style={styles.cameraInfo}>
-            <Text style={styles.cameraInfoText}>📹 Real Camera Feed</Text>
-          </View>
+          {children}
         </View>
-        
-        {children}
       </View>
     );
   };
 
   const renderQRScanner = () => (
-    <View style={[styles.container, styles.safeArea]}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.scannerContainer}>
         <Text style={styles.scannerTitle}>🔍 Scan Bin QR Code</Text>
         
-        <LiveCameraView onRead={(event) => {
-          if (!isScanning) {
-            setIsScanning(true);
-            const qrData = event.nativeEvent.codeStringValue;
-            const binId = qrData.substring(0, 15) || 'DETECTED-QR';
-            setScanResult(`✅ ${binId} detected!`);
-            onBinScan(); // Track bin scan for quest
-            
-            setTimeout(() => {
-              setScanMode('item');
-              setScanResult('');
-              setIsScanning(false);
-            }, 1500);
-          }
-        }}>
+        <CameraView isQRMode={true}>
           <View style={styles.cameraOverlay}>
             <Animated.View 
               style={[
@@ -403,7 +341,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
             {isScanning && (
               <View style={styles.scanningIndicator}>
                 <ActivityIndicator size="large" color="#4CAF50" />
-                <Text style={styles.scanningText}>Processing QR Code...</Text>
+                <Text style={styles.scanningText}>Scanning QR Code...</Text>
               </View>
             )}
             {scanResult && (
@@ -411,24 +349,17 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
                 <Text style={styles.resultText}>{scanResult}</Text>
               </View>
             )}
-            
-            {!isScanning && !scanResult && (
-              <View style={styles.instructionContainer}>
-                <Text style={styles.instructionText}>Point camera at QR code</Text>
-                <Text style={styles.instructionSubtext}>Tap scan when ready</Text>
-              </View>
-            )}
           </View>
-        </LiveCameraView>
+        </CameraView>
 
         <View style={styles.controlsContainer}>
           <Pressable
             style={[styles.scanButton, isScanning && styles.scanButtonDisabled]}
-            onPress={simulateQRDetection}
+            onPress={simulateQRScan}
             disabled={isScanning}
           >
             <Text style={styles.scanButtonText}>
-              {isScanning ? 'Scanning...' : 'Scan QR Code'}
+              {isScanning ? 'Scanning...' : 'Start QR Scan'}
             </Text>
           </Pressable>
 
@@ -440,15 +371,15 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
           </Pressable>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 
   const renderItemScanner = () => (
-    <View style={[styles.container, styles.safeArea]}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.scannerContainer}>
         <Text style={styles.scannerTitle}>📷 AI Item Recognition</Text>
         
-        <LiveCameraView showMarker={false}>
+        <CameraView isQRMode={false}>
           <View style={styles.cameraOverlay}>
             <Animated.View 
               style={[
@@ -485,36 +416,18 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
               </View>
             )}
             {detectedItem && (
-              <View style={[
-                styles.resultContainer, 
-                detectedItem.accepted === false && styles.rejectedContainer
-              ]}>
-                <Text style={styles.itemName}>
-                  {detectedItem.accepted === false ? '❌' : '✅'} {detectedItem.name}
-                </Text>
+              <View style={styles.resultContainer}>
+                <Text style={styles.itemName}>{detectedItem.name}</Text>
                 <Text style={styles.itemDetails}>
                   {detectedItem.type.toUpperCase()} • {detectedItem.weight}g
                 </Text>
-                {detectedItem.accepted !== false ? (
-                  <Text style={styles.itemRewards}>
-                    +{detectedItem.coins} coins • +{detectedItem.xp} XP
-                  </Text>
-                ) : (
-                  <Text style={styles.itemRejected}>
-                    Not recyclable here
-                  </Text>
-                )}
-              </View>
-            )}
-            
-            {!isScanning && !detectedItem && (
-              <View style={styles.instructionContainer}>
-                <Text style={styles.instructionText}>Point camera at recyclable item</Text>
-                <Text style={styles.instructionSubtext}>Tap scan when ready</Text>
+                <Text style={styles.itemRewards}>
+                  +{detectedItem.coins} coins • +{detectedItem.xp} XP
+                </Text>
               </View>
             )}
           </View>
-        </LiveCameraView>
+        </CameraView>
 
         <View style={styles.controlsContainer}>
           <Pressable
@@ -535,7 +448,7 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
           </Pressable>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 
   switch (scanMode) {
@@ -548,18 +461,12 @@ const ScannerScreen: React.FC<ScannerScreenProps> = ({
   }
 };
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
-  },
-  safeArea: {
-    paddingTop: Platform.OS === 'android' ? 25 : 0,
+    backgroundColor: '#f5f5f5',
   },
   content: {
     flex: 1,
@@ -568,40 +475,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#1B5E20',
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2E7D32',
     marginBottom: 10,
     textAlign: 'center',
-    textShadowColor: 'rgba(255, 255, 255, 0.8)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#2E7D32',
+    fontSize: 16,
+    color: '#666666',
     marginBottom: 40,
     textAlign: 'center',
-    fontWeight: '600',
-    textShadowColor: 'rgba(255, 255, 255, 0.7)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
   },
   modeContainer: {
     width: '100%',
     marginBottom: 40,
   },
   modeButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    padding: 30,
-    borderRadius: 20,
-    marginBottom: 25,
+    backgroundColor: 'white',
+    padding: 25,
+    borderRadius: 15,
+    marginBottom: 20,
     alignItems: 'center',
-    elevation: 8,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   qrButton: {
     borderLeftWidth: 4,
@@ -612,25 +512,23 @@ const styles = StyleSheet.create({
     borderLeftColor: '#4CAF50',
   },
   modeIcon: {
-    fontSize: 48,
-    marginBottom: 15,
+    fontSize: 40,
+    marginBottom: 10,
   },
   modeTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1B5E20',
-    marginBottom: 8,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
   },
   modeDesc: {
-    fontSize: 16,
-    color: '#424242',
+    fontSize: 14,
+    color: '#666',
     textAlign: 'center',
-    lineHeight: 22,
   },
   scannerContainer: {
     flex: 1,
     backgroundColor: '#000',
-    position: 'relative',
   },
   scannerTitle: {
     fontSize: 20,
@@ -641,127 +539,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)',
   },
   cameraView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    position: 'relative',
   },
-  liveCameraContainer: {
+  liveCameraFeed: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  liveCameraStyle: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: '100%',
-    height: '100%',
+    position: 'relative',
   },
   cameraBackground: {
     flex: 1,
     backgroundColor: '#1a1a1a',
     position: 'relative',
   },
-  cameraFeedLayer: {
-    flex: 1,
-    position: 'relative',
-  },
-  backgroundPattern1: {
-    position: 'absolute',
-    top: '15%',
-    left: '10%',
-    width: 140,
-    height: 90,
-    backgroundColor: 'rgba(95, 95, 95, 0.6)',
-    borderRadius: 12,
-  },
-  backgroundPattern2: {
-    position: 'absolute',
-    top: '45%',
-    right: '15%',
-    width: 80,
-    height: 120,
-    backgroundColor: 'rgba(120, 120, 120, 0.5)',
-    borderRadius: 10,
-  },
-  backgroundPattern3: {
-    position: 'absolute',
-    bottom: '25%',
-    left: '25%',
-    width: 100,
-    height: 50,
-    backgroundColor: 'rgba(75, 75, 75, 0.7)',
-    borderRadius: 8,
-  },
-  backgroundPattern4: {
-    position: 'absolute',
-    top: '30%',
-    left: '60%',
-    width: 60,
-    height: 60,
-    backgroundColor: 'rgba(85, 85, 85, 0.4)',
-    borderRadius: 30,
-  },
-  backgroundPattern5: {
-    position: 'absolute',
-    bottom: '40%',
-    right: '30%',
-    width: 90,
-    height: 30,
-    backgroundColor: 'rgba(65, 65, 65, 0.6)',
-    borderRadius: 15,
-  },
-  backgroundPattern6: {
-    position: 'absolute',
-    top: '60%',
-    left: '5%',
-    width: 50,
-    height: 80,
-    backgroundColor: 'rgba(105, 105, 105, 0.3)',
-    borderRadius: 6,
-  },
-  cameraGrain: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'transparent',
-    opacity: 0.1,
-  },
-  cameraVignette: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'transparent',
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 50,
-  },
-  cameraStatusOverlay: {
+  cameraStatus: {
     position: 'absolute',
     top: 20,
     left: 20,
-    right: 20,
-    zIndex: 10,
-  },
-  cameraIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    alignSelf: 'flex-start',
+    zIndex: 10,
   },
   recordingDot: {
     width: 8,
@@ -776,15 +573,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 1,
   },
-  cameraHint: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
-    marginTop: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
+  cameraGrain: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    opacity: 0.5,
+  },
+  dynamicElement1: {
+    position: 'absolute',
+    top: '25%',
+    left: '15%',
+    width: 100,
+    height: 60,
+    backgroundColor: 'rgba(80, 80, 80, 0.4)',
+    borderRadius: 8,
+  },
+  dynamicElement2: {
+    position: 'absolute',
+    bottom: '35%',
+    right: '20%',
+    width: 70,
+    height: 70,
+    backgroundColor: 'rgba(120, 120, 120, 0.3)',
+    borderRadius: 35,
   },
   permissionContainer: {
     flex: 1,
@@ -872,19 +686,12 @@ const styles = StyleSheet.create({
   },
   resultContainer: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -125 }, { translateY: -50 }],
+    bottom: 100,
     backgroundColor: 'rgba(76, 175, 80, 0.9)',
     padding: 20,
     borderRadius: 15,
     alignItems: 'center',
     minWidth: 250,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
   resultText: {
     color: 'white',
@@ -912,13 +719,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   controlsContainer: {
-    position: 'absolute',
-    bottom: 50,
-    left: 20,
-    right: 20,
     backgroundColor: 'rgba(0,0,0,0.8)',
     padding: 20,
-    borderRadius: 15,
     alignItems: 'center',
   },
   scanButton: {
@@ -955,48 +757,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  instructionContainer: {
-    position: 'absolute',
-    bottom: 200,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  instructionText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  instructionSubtext: {
-    color: '#ccc',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  cameraInfo: {
-    marginTop: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 10,
-    alignSelf: 'flex-start',
-  },
-  cameraInfoText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  rejectedContainer: {
-    backgroundColor: 'rgba(244, 67, 54, 0.9)', // Red background for rejected items
-  },
-  itemRejected: {
-    color: '#FFEBEE',
-    fontSize: 14,
-    textAlign: 'center',
     fontWeight: 'bold',
   },
 });

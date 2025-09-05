@@ -1,15 +1,55 @@
 import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-// Screens
-import TestHomeScreen from '../screens/TestHomeScreen';
-import TestScannerScreen from '../screens/TestScannerScreen';
-import TestQuestsScreen from '../screens/TestQuestsScreen';
-import TestLeaderboardScreen from '../screens/TestLeaderboardScreen';
-import TestShopScreen from '../screens/TestShopScreen';
-
 const Tab = createBottomTabNavigator();
+
+// Simple test screens
+const HomeScreen = () => (
+  <SafeAreaView style={styles.container}>
+    <View style={styles.content}>
+      <Text style={styles.title}>🏠 Home</Text>
+      <Text style={styles.subtitle}>Welcome to RecycleQuest!</Text>
+    </View>
+  </SafeAreaView>
+);
+
+const ScannerScreen = () => (
+  <SafeAreaView style={styles.container}>
+    <View style={styles.content}>
+      <Text style={styles.title}>📱 Scanner</Text>
+      <Text style={styles.subtitle}>Scan bins and items</Text>
+    </View>
+  </SafeAreaView>
+);
+
+const QuestsScreen = () => (
+  <SafeAreaView style={styles.container}>
+    <View style={styles.content}>
+      <Text style={styles.title}>🎯 Quests</Text>
+      <Text style={styles.subtitle}>Daily challenges</Text>
+    </View>
+  </SafeAreaView>
+);
+
+const LeaderboardScreen = () => (
+  <SafeAreaView style={styles.container}>
+    <View style={styles.content}>
+      <Text style={styles.title}>🏆 Leaderboard</Text>
+      <Text style={styles.subtitle}>Top recyclers</Text>
+    </View>
+  </SafeAreaView>
+);
+
+const ShopScreen = () => (
+  <SafeAreaView style={styles.container}>
+    <View style={styles.content}>
+      <Text style={styles.title}>🛍️ Shop</Text>
+      <Text style={styles.subtitle}>Redeem rewards</Text>
+    </View>
+  </SafeAreaView>
+);
 
 const AppNavigator = () => {
   return (
@@ -35,35 +75,35 @@ const AppNavigator = () => {
       >
         <Tab.Screen
           name="Home"
-          component={TestHomeScreen}
+          component={HomeScreen}
           options={{
             tabBarLabel: 'Home',
           }}
         />
         <Tab.Screen
           name="Scanner"
-          component={TestScannerScreen}
+          component={ScannerScreen}
           options={{
             tabBarLabel: 'Scan',
           }}
         />
         <Tab.Screen
           name="Quests"
-          component={TestQuestsScreen}
+          component={QuestsScreen}
           options={{
             tabBarLabel: 'Quests',
           }}
         />
         <Tab.Screen
           name="Leaderboard"
-          component={TestLeaderboardScreen}
+          component={LeaderboardScreen}
           options={{
             tabBarLabel: 'Ranking',
           }}
         />
         <Tab.Screen
           name="Shop"
-          component={TestShopScreen}
+          component={ShopScreen}
           options={{
             tabBarLabel: 'Shop',
           }}
@@ -72,5 +112,29 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#2E7D32',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#666',
+    textAlign: 'center',
+  },
+});
 
 export default AppNavigator;
