@@ -2,6 +2,8 @@
 
 A gamified recycling application that transforms everyday recycling tasks into engaging game-like experiences.
 
+https://github.com/SolomonNg1910/RecycleQuest.git
+
 ## Authors
 
 - **Lew Jing Xuan** - e1249208@u.nus.edu
