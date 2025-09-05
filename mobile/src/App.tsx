@@ -7,8 +7,9 @@ import ScannerScreen from './screens/ScannerScreen';
 import QuestsScreen from './screens/QuestsScreen';
 import LeaderboardScreen from './screens/LeaderboardScreen';
 import ShopScreen from './screens/ShopScreen';
+import FriendsScreen from './screens/FriendsScreen';
 
-type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard';
+type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard' | 'friends';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -101,6 +102,15 @@ function App() {
           <ShopScreen
             userCoins={userCoins}
             onSpendCoins={handleSpendCoins}
+            onNavigate={handleNavigate}
+          />
+        );
+      case 'friends':
+        return (
+          <FriendsScreen
+            userCoins={userCoins}
+            userXP={userXP}
+            userLevel={userLevel}
             onNavigate={handleNavigate}
           />
         );

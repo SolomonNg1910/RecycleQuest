@@ -9,7 +9,7 @@ import {
   ImageBackground,
 } from 'react-native';
 
-type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard';
+type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard' | 'friends';
 
 interface ShopScreenProps {
   userCoins: number;
@@ -74,6 +74,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({
             </Text>
           </Pressable>
         </View>
+
+        <Pressable
+          style={styles.button}
+          onPress={() => onNavigate('friends')}
+        >
+          <Text style={styles.buttonText}>👥 Friends & Teams</Text>
+        </Pressable>
 
         <Pressable
           style={[styles.button, styles.backButton]}
