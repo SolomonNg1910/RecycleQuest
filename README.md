@@ -2,6 +2,14 @@
 
 A gamified recycling application that transforms everyday recycling tasks into engaging game-like experiences.
 
+## Authors
+
+- **Lew Jing Xuan** - e1249208@u.nus.edu
+- **Calvin Soe Frederick** - e1121935@u.nus.edu
+- **Te Ming Xian** - e1121623@u.nus.edu
+- **Chong Le Tong, Trix** - tchong009@e.ntu.edu.sg
+- **Ng Xing Zhi, Solomon** - 2200713@sit.singaporetech.edu.sg
+
 ## Prerequisites
 
 - Node.js and npm installed
