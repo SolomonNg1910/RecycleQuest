@@ -47,7 +47,7 @@ npm install
 5. Click **Apply** and wait for the components to download
 6. **Important**: Note down the Android SDK location shown at the top of the Android SDK settings page
 
-### 4. Environment Setup (macOS)
+### 4. Environment Setup (macOS and windows)
 
 For macOS users, you need to configure environment variables:
 
@@ -73,7 +73,8 @@ For macOS users, you need to configure environment variables:
    ```bash
    source ~/.zshrc
    ```
-
+For windows users, you need to configure mobile\android\local.properties:
+1. sdk.dir=YOUR_SDK_PATH
 ### 5. Build and Run the Application
 
 1. Navigate to the mobile directory:
