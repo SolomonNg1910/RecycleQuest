@@ -8,7 +8,7 @@ import {
   ImageBackground,
 } from 'react-native';
 
-type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard' | 'friends';
+type Screen = 'home' | 'scanner' | 'quests' | 'shop' | 'leaderboard' | 'friends' | 'profile';
 
 interface HomeScreenProps {
   userCoins: number;
@@ -56,6 +56,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({
         </View>
 
         {/* Navigation Buttons */}
+        <Pressable
+          style={styles.button}
+          onPress={() => onNavigate('profile')}
+        >
+          <Text style={styles.buttonText}>👤 My Profile</Text>
+        </Pressable>
+
         <Pressable
           style={styles.button}
           onPress={() => onNavigate('scanner')}

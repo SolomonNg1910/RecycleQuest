@@ -52,7 +52,14 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+        indicatorStyle="black"
+        scrollIndicatorInsets={{ right: 1 }}
+        persistentScrollbar={true}
+      >
         <View style={styles.content}>
         <Text style={styles.title}>🏆 Leaderboard</Text>
         <Text style={styles.subtitle}>Top recyclers by level & XP</Text>
@@ -92,6 +99,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 40,
   },
   content: {
     padding: 20,
